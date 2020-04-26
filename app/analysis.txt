@@ -1,0 +1,52 @@
+1. Problem statement in existing implementation
+   Area : Backend
+   1.1 Page is too slow to load and refresh on pagination.
+
+2. Below are my observations and findings to cause this slowness
+
+   2.1 Multiple similar and duplicate sql queries are getting  executed on each company and contacts.
+       So multiple round trips to Db is expensive.
+   2.2 Direct Company and customer module is used in view template to iterate and get the details on each iterartion.
+   2.3 Sum of total and order count is calculated in code using 'for loop' instead get thru sql query itself.
+
+3. Inspected areas and solutions to improve performance
+   3.1 Verified indexes on each table which are participated in joins and where clause,
+     all seems good since all are already defined as PK.
+   3.2 Changed querying data approach instead of company to order i.e. top down to bottom ,
+       changed and retrieved details from order itself with joining company and contacts to reduce
+       iterations in view
+   3.3 Prepared order summary result set joining with Company table and found summary of total and record
+       count for each company.
+   3.4 Prepared second queryset for each contact with joining on contact table with order
+       and found total number of order for each contact.
+   3.5 From view (html template) changed looping object company to order summary query set
+       and iterate over summary result set.
+   3.6 For contact/customer details, retrieved from contact query set , here instead of finding/querying on each contact, gatheed all contcat details
+        when querying company details from order summary set.
+        e.g. for company id 1 if we have 10 contacts, I prepared/retrieved all 10 contacts details from second queryset
+        "contact orders summary query set"   using company id as condition so instead for executing 10
+        queries it return all result set for that specific contacts in single query.
+   3.7 Calculated total and record count on company and contact level in sql itself with aggregation api.
+   3.8 I would always prefer sql over auto ORM generated sql , that would help to have more control
+      and have chance to optimize on more level.
+
+ 4. Areas to considered but not implemented/ or not required.
+    4.1 Caching - current use case I dont see any reusable result set and evrything is retrived throuh loop/itertaion with specific condition.
+ 5. Can consider pagination on database side, queryside in module and cach page wise data and populate UI template on cashed data.
+    5.1 Can override cutome count for pagination, current default impl will use summary query to get count for pagination.
+
+ 6. My implementation result
+    6.1 Page is refreshing for 100 record page size around less than 50 MS
+    6.2 Reduced all duplicate and extra round trips to db from template, total queries executing to total number of companies. e.g. here 500 companies-per page 100
+    6.2 Upon mouse over, companies with over 50 000 € in sales shows their names painted with green background.
+
+ 7. Changed/Added files
+    7.1 views.py (changed) - return order summary query set as module thru 'get_queryset' and added 'simple-tag' to call method from html template
+    7.2 index.html (changed) - iterate over order summary list based on company id and get contact list using company id.
+    7.3 models.py (changed) - removed record count and total summary logic from modle
+    7.3 OrderDetailsHelper.py (Added) - to get order summary and contact order summary query set, total order count ect.
+
+
+
+
+
