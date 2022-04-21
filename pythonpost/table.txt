@@ -1,0 +1,8 @@
+user_id |user_name |email
+1  |vvvv |vv@gmil.vpm
+2   |Sumit  |sumit@gmail.com
+3   |Reshma  |reshma@gmail.com
+3   |Farhana  |farhana@gmail.com
+4    |Robin   |robin@gmail.com
+6   |Robin |robin@gmail.com
+7  |vvvv |vv@gmil.vpm
